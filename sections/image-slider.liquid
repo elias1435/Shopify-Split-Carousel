@@ -1,0 +1,190 @@
+{% schema %}
+{
+  "name": "Image Slider (Splide)",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Join the #alviofam"
+    },
+    {
+      "type": "checkbox",
+      "id": "full_width",
+      "label": "Enable full width",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "heading_font_size",
+      "label": "Heading font size (px)",
+      "min": 14,
+      "max": 72,
+      "step": 1,
+      "default": 32
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading text color",
+      "default": "#111111"
+    },
+    {
+      "type": "select",
+      "id": "heading_align",
+      "label": "Heading alignment",
+      "default": "center",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ]
+    },
+    {
+      "type": "number",
+      "id": "per_page",
+      "label": "Slides per view (desktop)",
+      "default": 3
+    },
+    {
+      "type": "number",
+      "id": "per_page_mobile",
+      "label": "Slides per view (mobile)",
+      "default": 1
+    },
+    {
+      "type": "number",
+      "id": "gap",
+      "label": "Gap between slides (px)",
+      "default": 20
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": "Enable autoplay",
+      "default": true
+    },
+    {
+      "type": "number",
+      "id": "interval",
+      "label": "Autoplay speed (ms)",
+      "default": 4000
+    }
+  ],
+  "blocks": [
+    {
+      "type": "image",
+      "name": "Slide",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "slide_image",
+          "label": "Slide image"
+        },
+        {
+          "type": "text",
+          "id": "alt_text",
+          "label": "Alt text"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 12,
+  "presets": [
+    {
+      "name": "Image Slider (Splide)",
+      "category": "Media"
+    }
+  ]
+}
+{% endschema %}
+
+<section class="splide-widget section">
+  {% if section.settings.full_width == false %}
+    <div class="page-width">
+  {% endif %}
+
+    {% if section.settings.heading != blank %}
+      <h2 
+        class="splide-heading"
+        style="
+          font-size: {{ section.settings.heading_font_size }}px;
+          color: {{ section.settings.heading_color }};
+          text-align: {{ section.settings.heading_align }};
+        "
+      >
+        {{ section.settings.heading }}
+      </h2>
+    {% endif %}
+
+    <div id="splide-{{ section.id }}" class="splide">
+      <div class="splide__track">
+        <ul class="splide__list">
+          {% for block in section.blocks %}
+            {% if block.settings.slide_image != blank %}
+              {% assign image = block.settings.slide_image | image_url: width: 1200 %}
+              <li class="splide__slide">
+                <img 
+                  src="{{ image }}" 
+                  alt="{{ block.settings.alt_text | escape }}"
+                  width="{{ block.settings.slide_image.width }}"
+                  height="{{ block.settings.slide_image.height }}"
+                  loading="lazy"
+                >
+              </li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+  {% if section.settings.full_width == false %}
+    </div>
+  {% endif %}
+</section>
+
+{%- comment -%}
+⚡ Option A: Upload Splide to /assets and load from Shopify CDN
+{{ 'splide.min.css' | asset_url | stylesheet_tag }}
+{{ 'splide.min.js' | asset_url | script_tag }}
+{%- endcomment -%}
+
+{%- comment -%}
+⚡ Option B: Use CDN with defer (simple)
+{%- endcomment -%}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@splidejs/splide@latest/dist/css/splide.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@latest/dist/js/splide.min.js" defer></script>
+
+<script defer>
+  document.addEventListener("DOMContentLoaded", function () {
+    new Splide("#splide-{{ section.id }}", {
+      type: "loop",
+      perPage: {{ section.settings.per_page }},
+      gap: "{{ section.settings.gap }}px",
+      autoplay: {{ section.settings.autoplay }},
+      interval: {{ section.settings.interval }},
+      pauseOnHover: true,
+      arrows: true,
+      pagination: true,
+      breakpoints: {
+        768: { perPage: {{ section.settings.per_page_mobile }} }
+      },
+    }).mount();
+  });
+</script>
+
+<style>
+  .splide-widget {
+    padding-top: var(--spaced-section-padding, 2rem);
+    padding-bottom: var(--spaced-section-padding, 2rem);
+  }
+  .splide-heading {
+    margin-bottom: 1.5rem;
+  }
+  .splide-widget img {
+    width: 100%;
+    height: auto;
+    border-radius: 0px;
+    display: block;
+  }
+</style>
